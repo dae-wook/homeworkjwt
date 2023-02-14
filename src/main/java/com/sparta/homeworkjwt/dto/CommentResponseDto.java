@@ -2,6 +2,7 @@ package com.sparta.homeworkjwt.dto;
 
 import com.sparta.homeworkjwt.entity.Comment;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.LastModifiedDate;
 
@@ -10,6 +11,7 @@ import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
+@Builder
 public class CommentResponseDto {
 
     private Long id;
@@ -26,4 +28,13 @@ public class CommentResponseDto {
         this.modifiedAt  = comment.getModifiedAt();
     }
 
+    public static CommentResponseDto from(Comment comment) {
+        return CommentResponseDto.builder()
+                .id(comment.getId())
+                .content(comment.getContent())
+                .username(comment.getUser().getUsername())
+                .createdAt(comment.getCreatedAt())
+                .modifiedAt(comment.getModifiedAt())
+                .build();
+    }
 }

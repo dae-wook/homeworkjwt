@@ -27,7 +27,8 @@ public class PostResponseDto {
         this.regDt = post.getCreatedAt();
 //        this.comments = post.getComments();
         for(Comment comment : post.getComments()) {
-            this.comments.add(new CommentResponseDto(comment.getId(), comment.getContent(), comment.getUser().getUsername(), comment.getCreatedAt(), comment.getModifiedAt()));
+//            this.comments.add(new CommentResponseDto(comment.getId(), comment.getContent(), comment.getUser().getUsername(), comment.getCreatedAt(), comment.getModifiedAt()));
+            this.comments.add(CommentResponseDto.from(comment));
         }
     }
 

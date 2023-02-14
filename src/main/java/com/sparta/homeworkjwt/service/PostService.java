@@ -4,6 +4,7 @@ package com.sparta.homeworkjwt.service;
 import com.sparta.homeworkjwt.component.JwtUtil;
 import com.sparta.homeworkjwt.dto.PostRequestDto;
 import com.sparta.homeworkjwt.dto.PostResponseDto;
+import com.sparta.homeworkjwt.dto.ResponseDto;
 import com.sparta.homeworkjwt.entity.Post;
 import com.sparta.homeworkjwt.entity.User;
 import com.sparta.homeworkjwt.entity.UserRoleEnum;
@@ -30,16 +31,16 @@ public class PostService {
 
     private final CommentRepository commentRepository;
 
-    public List<PostResponseDto> getPosts() {
+    public ResponseDto<List<PostResponseDto>> getPosts() {
         List<Post> list = postRepository.findAll();
         List<PostResponseDto> postResponseDtoList = new ArrayList<>();
         for(Post post : list) {
             postResponseDtoList.add(new PostResponseDto(post));
         }
-        return postResponseDtoList;
+        return ResponseDto.success(postResponseDtoList);
     }
 
-    public PostResponseDto createPost(PostRequestDto postRequestDto, HttpServletRequest request) {
+    public ResponseDto<PostResponseDto> createPost(PostRequestDto postRequestDto, HttpServletRequest request) {
         String token = jwtUtil.resolveToken(request);
         Claims claims;
         if(token != null) {
@@ -49,7 +50,7 @@ public class PostService {
                 Post post = new Post(postRequestDto, user);
                 postRepository.save(post);
 
-                return new PostResponseDto(post);
+                return ResponseDto.success(new PostResponseDto(post));
             }
 
         }
@@ -57,13 +58,13 @@ public class PostService {
     }
 
 
-    public PostResponseDto getPost(Long id) {
+    public ResponseDto<PostResponseDto> getPost(Long id) {
         PostResponseDto postResponseDto = new PostResponseDto(postRepository.findById(id).orElseThrow( () -> new IllegalArgumentException("존재하지 않는 게시글")));
-        return postResponseDto;
+        return ResponseDto.success(postResponseDto);
     }
 
     @Transactional
-    public PostResponseDto updatePost(Long id, PostRequestDto postRequestDto, HttpServletRequest request) {
+    public ResponseDto<PostResponseDto> updatePost(Long id, PostRequestDto postRequestDto, HttpServletRequest request) {
 
         String token = jwtUtil.resolveToken(request);
         if(token != null) {
@@ -74,7 +75,7 @@ public class PostService {
                 if(user.getRole() == UserRoleEnum.ADMIN || user.getUsername().equals(post.getUser().getUsername())) {
                     // 게시글 작성자와 로그인 유저가 같거나 로그인 유저가 어드민일 때
                     post.update(postRequestDto);
-                    return new PostResponseDto(post);
+                    return ResponseDto.success(new PostResponseDto(post));
                 } else {
                     throw new IllegalArgumentException("작성자만 수정할 수 있습니다.");
                 }
@@ -83,7 +84,7 @@ public class PostService {
         throw new IllegalArgumentException("토큰이 유효하지 않습니다.");
     }
 
-    public String deletePost(Long id, HttpServletRequest request) {
+    public ResponseDto<String> deletePost(Long id, HttpServletRequest request) {
         String token = jwtUtil.resolveToken(request);
         if(token != null) {
             if(jwtUtil.validateToken(token)) {
@@ -96,8 +97,7 @@ public class PostService {
                 }else {
                     throw new IllegalArgumentException("작성자만 삭제할 수 있습니다.");
                 }
-                return "{\"msg\":\"success\"," +
-                        "\"statusCode\":\"200\" }";
+                return ResponseDto.success("success");
             }
         }
         throw new IllegalArgumentException("토큰이 유효하지 않습니다.");

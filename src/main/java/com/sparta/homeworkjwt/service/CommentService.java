@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import com.sparta.homeworkjwt.component.JwtUtil;
 import com.sparta.homeworkjwt.dto.CommentRequestDto;
 import com.sparta.homeworkjwt.dto.CommentResponseDto;
+import com.sparta.homeworkjwt.dto.ResponseDto;
 import com.sparta.homeworkjwt.entity.Comment;
 import com.sparta.homeworkjwt.entity.Post;
 import com.sparta.homeworkjwt.entity.User;
@@ -28,7 +29,7 @@ public class CommentService {
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
     private final Gson gson;
-    public CommentResponseDto createComment(Long id, String content, HttpServletRequest request) {
+    public ResponseDto<CommentResponseDto> createComment(Long id, String content, HttpServletRequest request) {
 
         String token = jwtUtil.resolveToken(request);
         Claims claims;
@@ -40,14 +41,14 @@ public class CommentService {
                 User user = userRepository.findByUsername(claims.getSubject()).orElseThrow(() -> new NullPointerException("유저 정보를 찾을 수 없음"));
                 Comment comment = new Comment(user, post, content);
                 commentRepository.save(comment);
-                return new CommentResponseDto(comment);
+                return ResponseDto.success(new CommentResponseDto(comment));
             }
         }
         throw new IllegalArgumentException("토큰이 유효하지 않습니다.");
     }
 
     @Transactional
-    public CommentResponseDto updateComment(Long id, CommentRequestDto commentRequestDto, HttpServletRequest request) {
+    public ResponseDto<CommentResponseDto> updateComment(Long id, CommentRequestDto commentRequestDto, HttpServletRequest request) {
 
         String token = jwtUtil.resolveToken(request);
         if(token != null) {
@@ -59,7 +60,7 @@ public class CommentService {
                 if(user.getRole() == UserRoleEnum.ADMIN || user.getUsername().equals(comment.getUser().getUsername())) {
                     //댓글 단 유저와 로그인 유저가 같거나 권한이 ADMIN 일 때
                     comment.update(commentRequestDto);
-                    return new CommentResponseDto(comment);
+                    return ResponseDto.success(new CommentResponseDto(comment));
                 }else {
                     throw new IllegalArgumentException("작성자만 수정할 수 있습니다.");
                 }
@@ -68,7 +69,7 @@ public class CommentService {
         throw new IllegalArgumentException("토큰이 유효하지 않습니다.");
     }
 
-    public String deleteComment(Long id, HttpServletRequest request) {
+    public ResponseDto<String> deleteComment(Long id, HttpServletRequest request) {
         String token = jwtUtil.resolveToken(request);
         if(token != null) {
             if(jwtUtil.validateToken(token)) {
@@ -79,8 +80,7 @@ public class CommentService {
                 if(user.getRole() == UserRoleEnum.ADMIN || user.getUsername().equals(comment.getUser().getUsername())) {
                     //댓글 단 유저와 로그인 유저가 같거나 권한이 ADMIN 일 때
                     commentRepository.deleteById(id);
-                    return "{\"msg\":\"success\"," +
-                            "\"statusCode\":\"200\" }";
+                    return ResponseDto.success("success");
                 }else {
                     throw new IllegalArgumentException("작성자만 삭제할 수 있습니다.");
                 }
