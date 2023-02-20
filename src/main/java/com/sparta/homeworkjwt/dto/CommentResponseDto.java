@@ -17,9 +17,9 @@ public class CommentResponseDto {
     private Long id;
     private String content;
     private String username;
+    private int likeCount;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
-    private int likeCount;
 
     public CommentResponseDto(Comment comment) {
         this.id = comment.getId();

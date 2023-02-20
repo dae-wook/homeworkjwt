@@ -19,18 +19,18 @@ public class CommentController {
     private final CommentService commentService;
 
     @PostMapping("/comment/{id}")
-    public ResponseDto<CommentResponseDto> createComment(@PathVariable Long id, String content, HttpServletRequest request) {
-        return commentService.createComment(id, content, request);
+    public ResponseDto<CommentResponseDto> createComment(@PathVariable Long id, String content, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return commentService.createComment(id, content, userDetails);
     }
 
     @PutMapping("/comment/{id}")
-    public ResponseDto<CommentResponseDto> updateComment(@PathVariable Long id, CommentRequestDto commentRequestDto, HttpServletRequest request) {
-        return commentService.updateComment(id, commentRequestDto, request);
+    public ResponseDto<CommentResponseDto> updateComment(@PathVariable Long id, CommentRequestDto commentRequestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return commentService.updateComment(id, commentRequestDto, userDetails);
     }
 
     @DeleteMapping("/comment/{id}")
-    public ResponseDto<String> deleteComment(@PathVariable Long id, HttpServletRequest request) {
-        return commentService.deleteComment(id, request);
+    public ResponseDto<String> deleteComment(@PathVariable Long id, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return commentService.deleteComment(id, userDetails);
     }
 
     @PostMapping("/comment/like/{id}")
