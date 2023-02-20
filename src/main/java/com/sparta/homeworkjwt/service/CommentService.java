@@ -6,19 +6,19 @@ import com.sparta.homeworkjwt.component.JwtUtil;
 import com.sparta.homeworkjwt.dto.CommentRequestDto;
 import com.sparta.homeworkjwt.dto.CommentResponseDto;
 import com.sparta.homeworkjwt.dto.ResponseDto;
-import com.sparta.homeworkjwt.entity.Comment;
-import com.sparta.homeworkjwt.entity.Post;
-import com.sparta.homeworkjwt.entity.User;
-import com.sparta.homeworkjwt.entity.UserRoleEnum;
+import com.sparta.homeworkjwt.entity.*;
+import com.sparta.homeworkjwt.repository.CommentLikeRepository;
 import com.sparta.homeworkjwt.repository.CommentRepository;
 import com.sparta.homeworkjwt.repository.PostRepository;
 import com.sparta.homeworkjwt.repository.UserRepository;
+import com.sparta.homeworkjwt.security.UserDetailsImpl;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -28,7 +28,7 @@ public class CommentService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
-    private final Gson gson;
+    private final CommentLikeRepository commentLikeRepository;
     public ResponseDto<CommentResponseDto> createComment(Long id, String content, HttpServletRequest request) {
 
         String token = jwtUtil.resolveToken(request);
@@ -87,5 +87,17 @@ public class CommentService {
             }
         }
         throw new IllegalArgumentException("토큰이 유효하지 않습니다.");
+    }
+
+    public ResponseDto<String> likeComment(Long id, UserDetailsImpl userDetails) {
+        Comment comment = commentRepository.findById(id).orElseThrow( () -> new NullPointerException("존재하지 않는 댓글"));
+        Optional<CommentLike> optionalCommentLike = commentLikeRepository.findByCommentAndUser(comment, userDetails.getUser());
+        if(optionalCommentLike.isPresent()) { // 유저가 이미 좋아요를 눌렀을 때
+            commentLikeRepository.deleteById(optionalCommentLike.get().getId());
+            return ResponseDto.success("댓글 좋아요 취소");
+        }
+
+        commentLikeRepository.save(new CommentLike(comment, userDetails.getUser()));
+        return ResponseDto.success("댓글 좋아요 성공");
     }
 }

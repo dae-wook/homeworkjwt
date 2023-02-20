@@ -15,6 +15,7 @@ public class PostResponseDto {
     private String title;
     private String username;
     private String content;
+    private int likeCount;
     private LocalDateTime regDt;
 //    private List<Comment> comments;
     private List<CommentResponseDto> comments = new ArrayList<>();
@@ -25,6 +26,7 @@ public class PostResponseDto {
         this.username = post.getUser().getUsername();
         this.content = post.getContent();
         this.regDt = post.getCreatedAt();
+        this.likeCount = post.getLikes().size();
 //        this.comments = post.getComments();
         for(Comment comment : post.getComments()) {
 //            this.comments.add(new CommentResponseDto(comment.getId(), comment.getContent(), comment.getUser().getUsername(), comment.getCreatedAt(), comment.getModifiedAt()));
