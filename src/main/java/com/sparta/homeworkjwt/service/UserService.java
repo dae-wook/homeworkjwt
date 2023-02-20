@@ -3,6 +3,7 @@ package com.sparta.homeworkjwt.service;
 
 import com.sparta.homeworkjwt.component.JwtUtil;
 import com.sparta.homeworkjwt.dto.ResponseDto;
+import com.sparta.homeworkjwt.dto.SignupRequestDto;
 import com.sparta.homeworkjwt.entity.User;
 import com.sparta.homeworkjwt.entity.UserRoleEnum;
 import com.sparta.homeworkjwt.repository.UserRepository;
@@ -22,23 +23,16 @@ public class UserService {
     private final JwtUtil jwtUtil;
 
     @Transactional
-    public ResponseDto<String> signup(String username, String password) {
-        final String PASS_PATTERN = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{8,15}$";//소문자 1, 대문자1, 숫자1, 특수문자1개 포함 8자 이상 15자 이하
-        final String NAME_PATTERN = "^[a-z0-9]{4,10}$";// 소문자, 숫자 포함 4자 이상 10자 이하
+    public ResponseDto<String> signup(SignupRequestDto requestDto) {
 
-        Pattern passPattern = Pattern.compile(PASS_PATTERN);
-        Matcher passMatcher = passPattern.matcher(password);
-        Pattern namePattern = Pattern.compile(NAME_PATTERN);
-        Matcher nameMatcher = namePattern.matcher(username);
-
-        if(nameMatcher.matches() && passMatcher.matches()) { //아이디, 패스워드 조건 만족할 때 실행
-            Optional<User> optionalUser = userRepository.findByUsername(username);
+        if(requestDto.isValid()) { //아이디, 패스워드 조건 만족할 때 실행
+            Optional<User> optionalUser = userRepository.findByUsername(requestDto.getUsername());
 
             if (optionalUser.isPresent()) { // 중복체크
-                throw new IllegalArgumentException("이미 존재하는 username 입니다.");
+                throw new IllegalArgumentException("중복된 username 입니다.");
             }
 
-            User user = new User(username, password, UserRoleEnum.USER);
+            User user = new User(requestDto.getUsername(), requestDto.getPassword(), UserRoleEnum.USER);
             userRepository.save(user);
             return ResponseDto.success("회원가입 성공");
 

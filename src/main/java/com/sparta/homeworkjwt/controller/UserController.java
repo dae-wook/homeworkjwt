@@ -1,6 +1,7 @@
 package com.sparta.homeworkjwt.controller;
 
 import com.sparta.homeworkjwt.dto.ResponseDto;
+import com.sparta.homeworkjwt.dto.SignupRequestDto;
 import com.sparta.homeworkjwt.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,9 +16,9 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/signup")
-    public ResponseDto<String> signup(String username, String password) {
+    public ResponseDto<String> signup(SignupRequestDto requestDto) {
 
-        return userService.signup(username, password);
+        return userService.signup(requestDto);
     }
 
     @PostMapping("login")
